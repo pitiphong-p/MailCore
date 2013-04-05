@@ -61,7 +61,7 @@
 /**
  This method is used to initialize a folder. This method or the
  method in CTCoreAccount folderWithPath can be used to setup a folder.
- @param inAccount This parameter must be passed in so the folder can initiate it's connection.
+ @param inAccount This parameter must be passed in so the folder can initiate it<s connection.
 */
 - (id)initWithPath:(NSString *)path inAccount:(CTCoreAccount *)account;
 
@@ -135,7 +135,6 @@
 - (NSArray *)messagesWithSequenceNumbers:(NSIndexSet *)sequenceNumbers
                          fetchAttributes:(CTFetchAttributes)attrs;
 
-
 /**
  Use this method to download message lists from the server.
  
@@ -148,6 +147,33 @@
  */
 - (NSArray *)messagesWithUIDs:(NSIndexSet *)uidNumbers
               fetchAttributes:(CTFetchAttributes)attrs;
+
+
+/**
+Use this method get the message uids sorted by the sort descriptors and filtered with predicate.
+  
+ @param predicate The filtering predicate sent to IMAP server for filtering the messages.
+ @param sortDescrptors The descriptors sent to IMAP server for sorting message uid on server.
+ @param attrs This controls what is fetched.
+ @return Returns a NSArray of messages uid. Returns nil on error
+ */
+- (NSArray *)messagesUIDsMatchingPredicate:(NSPredicate *)predicate
+                           sortDescriptors:(NSArray *)sortDescriptors;
+
+
+/**
+ Use this method get the messages sorted by the sort descriptors and filtered with predicate.
+ 
+ @param predicate The filtering predicate sent to IMAP server for filtering the messages.
+ @param sortDescrptors The descriptors sent to IMAP server for sorting message uid on server.
+ @param attrs This controls what is fetched.
+ @return Returns a NSArray of CTCoreMessage's. Filtered with the predicate and sorted by the sort descriptors.
+ Returns nil on error
+ @see messagesUIDsMatchingPredicate:sortDescriptors:
+ */
+- (NSArray *)messagesMatchingPredicate:(NSPredicate *)predicate
+                       sortDescriptors:(NSArray *)sortDescriptors
+                   withFetchAttributes:(CTFetchAttributes)attrs;;
 
 
 /**

@@ -312,3 +312,19 @@ clist *MailCoreClistFromStringArray(NSArray *strings) {
   
 	return str_list;
 }
+
+struct mailimap_date * mailimap_dateFromDate(NSDate *date) {
+  static NSCalendar *calendar;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+  });
+  
+  return mailimap_dateFromDateComponents([calendar components:(NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit)
+                                                     fromDate:date]);
+}
+
+struct mailimap_date * mailimap_dateFromDateComponents(NSDateComponents *dateComponents) {
+  return mailimap_date_new(dateComponents.day, dateComponents.month, dateComponents.year);
+}
+
