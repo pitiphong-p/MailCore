@@ -54,7 +54,6 @@ void mailimap_sort_key_free(struct mailimap_sort_key * key);
 
 @end
 
-static const int MAX_PATH_SIZE = 1024;
 
 @implementation CTCoreFolder
 @synthesize lastError, parentAccount=myAccount, idling;

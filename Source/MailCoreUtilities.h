@@ -32,6 +32,8 @@
 #import <Foundation/Foundation.h>
 #import <libetpan/libetpan.h>
 
+static const int MAX_PATH_SIZE = 1024;
+
 /**
      Enables logging of all streams, data is output to standard out.
 */
@@ -73,4 +75,6 @@ struct mailimap_date * mailimap_dateFromDateComponents(NSDateComponents *dateCom
 
 struct mailimap_set * mailimap_setFromIndexSet(NSIndexSet *indexSet);
 NSIndexSet * MailCoreIndexSetFromMailImapSet(struct mailimap_set *set);
+
+const char * getUTF7String(NSString *str, char * buffer);
 

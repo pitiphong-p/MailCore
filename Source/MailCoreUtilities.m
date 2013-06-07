@@ -506,3 +506,11 @@ NSIndexSet * MailCoreIndexSetFromMailImapSet(struct mailimap_set *set) {
     return [[indexSet copy] autorelease];
 }
 
+const char * getUTF7String(NSString *str, char * buffer) {
+    if (CFStringGetCString((CFStringRef)str, buffer, MAX_PATH_SIZE, kCFStringEncodingUTF7_IMAP)) {
+          return buffer;
+      } else {
+          return NULL;
+      }
+}
+
