@@ -71,3 +71,6 @@ NSTimeZone * MailCoreTimeZoneFromDTTimeZone(int timezone);
 struct mailimap_date * mailimap_dateFromDate(NSDate *date);
 struct mailimap_date * mailimap_dateFromDateComponents(NSDateComponents *dateComponents);
 
+struct mailimap_set * mailimap_setFromIndexSet(NSIndexSet *indexSet);
+NSIndexSet * MailCoreIndexSetFromMailImapSet(struct mailimap_set *set);
+
