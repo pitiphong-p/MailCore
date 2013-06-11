@@ -312,6 +312,12 @@ Use this method get the message uids sorted by the sort descriptors and filtered
  */
 - (BOOL)setFlags:(NSUInteger)flags extensionFlags:(NSArray *)extensionFlags forMessage:(CTCoreMessage *)msg;
 
+- (BOOL)addFlags:(NSUInteger)flags forMessagesWithUID:(NSIndexSet *)messageUIDs;
+- (BOOL)addExtensionFlags:(NSArray *)extensionFlags  forMessagesWithUID:(NSIndexSet *)messageUIDs;
+
+- (BOOL)removeFlags:(NSUInteger)flags forMessagesWithUID:(NSIndexSet *)messageUIDs;
+- (BOOL)removeExtensionFlags:(NSArray *)flags forMessagesWithUID:(NSIndexSet *)messageUIDs;
+
 /**
  Deletes all messages contained in the folder that are marked for
  deletion. Deleting messages in IMAP is a little strange, first

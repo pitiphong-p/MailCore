@@ -922,6 +922,128 @@ void mailimap_sort_key_free(struct mailimap_sort_key * key);
     return YES;
 }
 
+- (BOOL)addFlags:(NSUInteger)flags forMessagesWithUID:(NSIndexSet *)messageUIDs {
+    if (![messageUIDs count]) {
+        return [NSIndexSet indexSet];
+    }
+    
+    BOOL success = [self connect];
+    if (!success) {
+        return NO;
+    }
+    
+    struct mailimap_set * uid_set = mailimap_setFromIndexSet(messageUIDs);
+    struct mail_flags * mail_flags = mail_flags_new(flags, clist_new());
+    struct mailimap_flag_list * imap_flags;
+    int err = imap_flags_to_imap_flags(mail_flags, &imap_flags);
+    if (err != MAIL_NO_ERROR) {
+        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
+        return nil;
+    }
+    
+    // Add the flags with silent mode (+FLAGS.SILENT).
+    struct mailimap_store_att_flags * flag_attribute = mailimap_store_att_flags_new(1, 1, imap_flags);
+    err = mailimap_uid_store([self imapSession], uid_set, flag_attribute);
+    if (err != MAIL_NO_ERROR) {
+        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
+        return nil;
+    }
+    
+    return err == MAIL_NO_ERROR;
+}
+
+- (BOOL)addExtensionFlags:(NSArray *)extensionFlags forMessagesWithUID:(NSIndexSet *)messageUIDs {
+    if (![messageUIDs count]) {
+        return [NSIndexSet indexSet];
+    }
+    
+    BOOL success = [self connect];
+    if (!success) {
+        return NO;
+    }
+    
+    struct mailimap_set * uid_set = mailimap_setFromIndexSet(messageUIDs);
+    clist *flags = MailCoreClistFromStringArray(extensionFlags);
+    struct mail_flags * mail_flags = mail_flags_new(0, flags);
+    struct mailimap_flag_list * imap_flags;
+    int err = imap_flags_to_imap_flags(mail_flags, &imap_flags);
+    if (err != MAIL_NO_ERROR) {
+        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
+        return nil;
+    }
+    
+    // Add the flags with silent mode (+FLAGS.SILENT).
+    struct mailimap_store_att_flags * flag_attribute = mailimap_store_att_flags_new(1, 1, imap_flags);
+    err = mailimap_uid_store([self imapSession], uid_set, flag_attribute);
+    if (err != MAIL_NO_ERROR) {
+        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
+        return nil;
+    }
+    
+    return err == MAIL_NO_ERROR;
+}
+
+- (BOOL)removeFlags:(NSUInteger)flags forMessagesWithUID:(NSIndexSet *)messageUIDs {
+    if (![messageUIDs count]) {
+        return [NSIndexSet indexSet];
+    }
+    
+    BOOL success = [self connect];
+    if (!success) {
+        return NO;
+    }
+    
+    struct mailimap_set * uid_set = mailimap_setFromIndexSet(messageUIDs);
+    struct mail_flags * mail_flags = mail_flags_new(flags, clist_new());
+    struct mailimap_flag_list * imap_flags;
+    int err = imap_flags_to_imap_flags(mail_flags, &imap_flags);
+    if (err != MAIL_NO_ERROR) {
+        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
+        return nil;
+    }
+    
+    // Delete flags with silent mode (-FLAGS.SILENT).
+    struct mailimap_store_att_flags * flags_attribute = mailimap_store_att_flags_new(-1, 1, imap_flags);
+    err = mailimap_uid_store([self imapSession], uid_set, flags_attribute);
+    if (err != MAIL_NO_ERROR) {
+        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
+        return nil;
+    }
+    
+    return err == MAIL_NO_ERROR;
+}
+
+- (BOOL)removeExtensionFlags:(NSArray *)extensionFlags forMessagesWithUID:(NSIndexSet *)messageUIDs {
+    if (![messageUIDs count]) {
+        return [NSIndexSet indexSet];
+    }
+    
+    BOOL success = [self connect];
+    if (!success) {
+        return NO;
+    }
+    
+    struct mailimap_set * uid_set = mailimap_setFromIndexSet(messageUIDs);
+    clist *flags = MailCoreClistFromStringArray(extensionFlags);
+    struct mail_flags * mail_flags = mail_flags_new(0, flags);
+    struct mailimap_flag_list * imap_flags;
+    int err = imap_flags_to_imap_flags(mail_flags, &imap_flags);
+    if (err != MAIL_NO_ERROR) {
+        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
+        return nil;
+    }
+    
+    // Add the flags with silent mode (-FLAGS.SILENT).
+    struct mailimap_store_att_flags * flag_attribute = mailimap_store_att_flags_new(-1, 1, imap_flags);
+    err = mailimap_uid_store([self imapSession], uid_set, flag_attribute);
+    if (err != MAIL_NO_ERROR) {
+        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
+        return nil;
+    }
+    
+    return err == MAIL_NO_ERROR;
+}
+
 - (BOOL)expunge {
     int err;
     BOOL success = [self connect];

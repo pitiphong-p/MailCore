@@ -513,4 +513,3 @@ const char * getUTF7String(NSString *str, char * buffer) {
           return NULL;
       }
 }
-
