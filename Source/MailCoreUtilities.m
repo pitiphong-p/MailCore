@@ -61,8 +61,16 @@ void MailCoreDisableLogging() {
 }
 
 NSError* MailCoreCreateError(int errcode, NSString *description) {
+    return MailCoreCreateErrorDetail(errcode, description, nil);
+}
+
+NSError* MailCoreCreateErrorDetail(int errcode, NSString *description, NSString *failureReason) {
     NSMutableDictionary *errorDetail = [NSMutableDictionary dictionary];
     [errorDetail setValue:description forKey:NSLocalizedDescriptionKey];
+    if (failureReason) {
+        [errorDetail setObject:failureReason forKey:NSLocalizedFailureReasonErrorKey];
+    }
+    
     return [NSError errorWithDomain:@"mailcore" code:errcode userInfo:errorDetail];
 }
 
@@ -86,6 +94,10 @@ NSError* MailCoreCreateErrorFromSMTPCode(int errcode) {
 }
 
 NSError* MailCoreCreateErrorFromIMAPCode(int errcode) {
+    return MailCoreCreateErrorFromIMAPError(errcode, nil);
+}
+
+NSError *MailCoreCreateErrorFromIMAPError(int errcode, NSString *reason) {
     NSString *description = @"";
     switch (errcode) {
         case MAILIMAP_ERROR_BAD_STATE:
@@ -258,7 +270,7 @@ NSError* MailCoreCreateErrorFromIMAPCode(int errcode) {
             description = [NSString stringWithFormat:@"Error: %d", errcode];
             break;
     }
-    return MailCoreCreateError(errcode, description);
+    return MailCoreCreateErrorDetail(errcode, description, reason);
 }
 
 NSString *MailCoreDecodeMIMEPhrase(const char *data) {

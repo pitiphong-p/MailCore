@@ -1275,6 +1275,7 @@ int uid_list_to_env_list(clist * fetch_result, struct mailmessage_list ** result
             res = MAIL_ERROR_MEMORY;
             goto free_msg;
         }
+        
     }
 
     env_list = mailmessage_list_new(tab);
@@ -1319,7 +1320,7 @@ int uid_list_to_env_list(clist * fetch_result, struct mailmessage_list ** result
     }
     
     if (err != MAIL_NO_ERROR) {
-        self.lastError = MailCoreCreateErrorFromIMAPCode(err);
+        self.lastError = MailCoreCreateErrorFromIMAPError(err, [NSString stringWithUTF8String:imapSession->imap_response]);
     } else if (destinationUIDSet) {
         destinationUIDs = MailCoreIndexSetFromMailImapSet(destinationUIDSet);
     } else if (nextUID) {

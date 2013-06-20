@@ -40,12 +40,15 @@ static const int MAX_PATH_SIZE = 1024;
 void MailCoreEnableLogging();
 void MailCoreDisableLogging();
 
+NSError* MailCoreCreateErrorDetail(int errcode, NSString *description, NSString *failureReason);
+
 NSError* MailCoreCreateError(int errcode, NSString *description);
 
 /**
     Translates the LibEtPan IMAP error code into NSError with error description
 */
 NSError* MailCoreCreateErrorFromIMAPCode(int errcode);
+NSError *MailCoreCreateErrorFromIMAPError(int errcode, NSString *reason);
 
 /**
     Translates a LibEtPan SMTP specific error code into an NSError with a description
