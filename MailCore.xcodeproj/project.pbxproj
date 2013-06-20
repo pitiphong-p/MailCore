@@ -1057,9 +1057,9 @@
 					iOSPorts/include,
 				);
 				ONLY_ACTIVE_ARCH = NO;
-				PRIVATE_HEADERS_FOLDER_PATH = ../../include/MailCore/Private;
+				PRIVATE_HEADERS_FOLDER_PATH = "../..//include/MailCore/Private";
 				PRODUCT_NAME = mailcore;
-				PUBLIC_HEADERS_FOLDER_PATH = ../../include/MailCore;
+				PUBLIC_HEADERS_FOLDER_PATH = "$(CONFIGURATION_BUILD_DIR)/include/MailCore";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 			};
@@ -1077,9 +1077,9 @@
 					iOSPorts/include,
 				);
 				ONLY_ACTIVE_ARCH = NO;
-				PRIVATE_HEADERS_FOLDER_PATH = ../../include/MailCore/Private;
+				PRIVATE_HEADERS_FOLDER_PATH = "../..//include/MailCore/Private";
 				PRODUCT_NAME = mailcore;
-				PUBLIC_HEADERS_FOLDER_PATH = ../../include/MailCore;
+				PUBLIC_HEADERS_FOLDER_PATH = "$(CONFIGURATION_BUILD_DIR)/include/MailCore";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				ZERO_LINK = NO;
