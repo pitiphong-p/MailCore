@@ -81,3 +81,5 @@ NSIndexSet * MailCoreIndexSetFromMailImapSet(struct mailimap_set *set);
 
 const char * getUTF7String(NSString *str, char * buffer);
 
+NSString * MailCoreRFC822HeaderFromMailImapMsgAtt(struct mailimap_msg_att *msg_att) ;
+

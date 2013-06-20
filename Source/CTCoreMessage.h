@@ -57,6 +57,7 @@ typedef enum {
     NSError *lastError;
     CTCoreFolder *parentFolder;
     CTCoreMessagePriority mailPriority;
+    NSString *rfc822Header;
 }
 /**
  If an error occurred (nil or return of NO) call this method to get the error
@@ -64,6 +65,9 @@ typedef enum {
 @property (nonatomic, retain) NSError *lastError;
 
 @property (nonatomic, retain) CTCoreFolder *parentFolder;
+
+
+@property (nonatomic, copy) NSString *rfc822Header;
 
 /**
  If the body structure has been fetched, this will contain the MIME structure
@@ -342,12 +346,17 @@ typedef enum {
  */
 - (NSString *)rfc822Header;
 
-
 /**
  Sets the outgoing message's priority header value.
  Support for Mail Prioirty header defined in IMAP 4021 and X-Prioirty header.
  */
 - (void)setMailPriority:(CTCoreMessagePriority)priority;
+
+/**
+ return rfc822 content of the message headers that is store locally.
+ */
+- (NSString *)localRFC822Header;
+
 
 /* Intended for advanced use only */
 - (struct mailmessage *)messageStruct;
