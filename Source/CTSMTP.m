@@ -105,6 +105,10 @@
     while ((rcpt = [objEnum nextObject])) {
         BOOL success = [self setRecipientAddress:[rcpt email]];
         if (!success) {
+            NSString *reason = [NSString stringWithCString:self->mySMTP->response encoding:NSUTF8StringEncoding];
+            NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithDictionary:self.lastError.userInfo];
+            userInfo[NSLocalizedFailureReasonErrorKey] = reason;
+            self.lastError = [NSError errorWithDomain:self.lastError.domain code:self.lastError.code userInfo:userInfo];
             return NO;
         }
     }
