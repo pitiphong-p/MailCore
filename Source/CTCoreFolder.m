@@ -372,12 +372,13 @@ void mailimap_sort_key_free(struct mailimap_sort_key * key);
     struct mailimap_flag_list * flag_list;
     
     err = imap_flags_to_imap_flags(flags, &flag_list);
+    mailimap *imapSession = [self imapSession];
     if (err == MAIL_NO_ERROR) {
         uint32_t uidvalidity = 0;
         uint32_t messageUID = 0;
         char mbPath[MAX_PATH_SIZE];
         [self getUTF7String:mbPath fromString:[self path]];
-        err =  mailimap_uidplus_append([self imapSession],
+        err =  mailimap_uidplus_append(imapSession,
                                        mbPath,
                                        flag_list,
                                        NULL,
@@ -394,8 +395,9 @@ void mailimap_sort_key_free(struct mailimap_sort_key * key);
     }
     
     mail_flags_free(flags);
-    if (MAILIMAP_NO_ERROR != err)
-        self.lastError = MailCoreCreateErrorFromIMAPCode (err);
+    if (MAILIMAP_NO_ERROR != err) {
+        self.lastError = MailCoreCreateErrorFromIMAPError(err, [NSString stringWithUTF8String:imapSession->imap_response]);
+    }
     return MAILIMAP_NO_ERROR == err;
 }
 
