@@ -32,6 +32,8 @@
 #import "MailCoreUtilities.h"
 #import "MailCoreTypes.h"
 
+#import "mailmime_decode.h"
+
 /* direction is 1 for send, 0 for receive, -1 when it does not apply */
 void mailcore_logger(int direction, const char * str, size_t size) {
     char *str2 = malloc(size+1);
@@ -297,6 +299,28 @@ NSString *MailCoreDecodeMIMEPhrase(const char *data) {
     return result;
 }
 
+NSString *MailCoreDecodeMIMELanguagePhrase(const char *data, const char *fromCode) {
+    int err;
+    NSString *result;
+    
+    char * decodedWord;
+    if (data && *data != '\0') {
+        size_t indx = 0;
+        size_t length = 0;
+        err = mailmime_quoted_printable_body_parse(data, strlen(data), &indx, &decodedWord, &length, 0);
+        
+        if (err != MAILIMF_NO_ERROR) {
+            
+            return nil;
+        }
+    } else {
+        return @"";
+    }
+    
+    result = [NSString stringWithCString:decodedWord encoding:NSUTF8StringEncoding];
+    return result;
+}
+
 NSString *MailCoreGetFileNameFromMIME(struct mailmime * mime) {
     NSString *filename = nil;
     struct mailmime_single_fields * mimeFields = mailmime_single_fields_new(mime->mm_mime_fields, mime->mm_content_type);
@@ -312,21 +336,57 @@ NSString *MailCoreGetFileNameFromMIME(struct mailmime * mime) {
 
 NSString *MailCoreGetFileNameFromMIMEFields(struct mailmime_single_fields * mimeFields) {
     NSString *filename = nil;
-    char * rawFilename = NULL;
-    if (mimeFields->fld_disposition_filename) {
-        rawFilename = mimeFields->fld_disposition_filename;
-    } else if (mimeFields->fld_content_name) {
-        rawFilename = mimeFields->fld_content_name;
+    if ((mimeFields->fld_disposition && mimeFields->fld_disposition->dsp_parms) || mimeFields->fld_disposition_filename) {
+        NSDictionary *dispositions = MailCoreDispositionsFromMIMEDipositionList(mimeFields->fld_disposition->dsp_parms);
+        NSArray *filenameKeys = [[dispositions allKeys] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self beginswith[cd] 'filename'"]];
+        if (filenameKeys.count > 1 || !mimeFields->fld_disposition_filename) {
+            filenameKeys = [filenameKeys sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+            NSMutableString *dispositionFilename = [[NSMutableString alloc] init];
+            for (NSString *key in filenameKeys) {
+                NSString *filenamePart = [dispositions objectForKey:key];
+                if (filenamePart.length) {
+                    [dispositionFilename appendString:filenamePart];
+                }
+            }
+            
+            filename = [dispositionFilename copy];
+        } else if (mimeFields->fld_disposition_filename) {
+            char * rawFilename = mimeFields->fld_disposition_filename;
+            filename = [NSString stringWithCString:rawFilename
+                                          encoding:NSUTF8StringEncoding];
+        }
     }
     
-    if (rawFilename) {
+    if (!filename && mimeFields->fld_content_name) {
+        char * rawFilename = mimeFields->fld_content_name;
         filename = [NSString stringWithCString:rawFilename
                                       encoding:NSUTF8StringEncoding];
-        
+    }
+    
+    static NSRegularExpression *rfc2231Expression;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSError *error = nil;
+        rfc2231Expression = [[NSRegularExpression alloc] initWithPattern:@"([\\w-]+)(\\'[\\w, ]?\\')([\\w\\d\%. ]+)"
+                                                                 options:NSRegularExpressionCaseInsensitive
+                                                                   error:&error];
+    });
+    NSArray *rfc2231Matches = nil;
+    if (filename.length) {
         // Check for RFC-2047 encoded filename
         if ([filename hasPrefix:@"=?"] &&
             [filename hasSuffix:@"?="]) {
             filename = MailCoreDecodeMIMEPhrase([filename UTF8String]);
+        } else if ((rfc2231Matches = [rfc2231Expression matchesInString:filename
+                                                                options:NSMatchingCompleted
+                                                                  range:(NSRange) { 0, filename.length }]).count) {
+            NSTextCheckingResult *result = rfc2231Matches[0];
+            if (result.numberOfRanges >= 4) {
+                NSString *encoding = [filename substringWithRange:[result rangeAtIndex:1]];
+                NSString *value = [[filename substringWithRange:[result rangeAtIndex:3]] stringByReplacingOccurrencesOfString:@"%" withString:@"="];
+                
+                filename = MailCoreDecodeMIMELanguagePhrase([value UTF8String], [encoding UTF8String]);
+            }
         }
     }
     
@@ -356,6 +416,62 @@ NSString *MailCoreGetEMLFileNameFromMIME(struct mailmime * mime) {
     }
     
     return filename;
+}
+
+NSDictionary * MailCoreDispositionsFromMIMEDipositionList(clist *params) {
+    if (!params) {
+        return nil;
+    }
+    
+    NSMutableDictionary *dispositions = [NSMutableDictionary dictionaryWithCapacity:clist_count(params)];
+    clistiter *iter;
+    struct mailmime_disposition_parm *param;
+    for (iter = clist_begin(params); iter != NULL; iter = clist_next(iter)) {
+        param = clist_content(iter);
+        NSString *key = nil;
+        id value = nil;
+        switch (param->pa_type) {
+            case MAILMIME_DISPOSITION_PARM_FILENAME: {
+                key = @"filename";
+                value = [NSString stringWithUTF8String:param->pa_data.pa_filename];
+                break;
+            }
+            case MAILMIME_DISPOSITION_PARM_CREATION_DATE: {
+                key = @"creation-date";
+                value = [NSString stringWithUTF8String:param->pa_data.pa_creation_date];
+                break;
+            }
+            case MAILMIME_DISPOSITION_PARM_MODIFICATION_DATE: {
+                key = @"modification-date";
+                value = [NSString stringWithUTF8String:param->pa_data.pa_modification_date];
+                break;
+            }
+            case MAILMIME_DISPOSITION_PARM_READ_DATE: {
+                key = @"read-date";
+                value = [NSString stringWithUTF8String:param->pa_data.pa_read_date];
+                break;
+            }
+            case MAILMIME_DISPOSITION_PARM_SIZE: {
+                key = @"size";
+                value = @(param->pa_data.pa_size);
+                break;
+            }
+            case MAILMIME_DISPOSITION_PARM_PARAMETER: {
+                key = [[NSString stringWithUTF8String:param->pa_data.pa_parameter->pa_name] lowercaseString];
+                value = [NSString stringWithUTF8String:param->pa_data.pa_parameter->pa_value];
+                break;
+            }
+        
+            default:
+                break;
+        }
+        
+        if (key && value) {
+            dispositions[key] = value;
+        }
+    }
+    
+    return [[dispositions copy] autorelease];
 }
 
 NSDictionary * MailCoreAddressRepresentationFromMailBox(struct mailimf_mailbox *mailbox) {

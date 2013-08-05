@@ -60,6 +60,7 @@ NSString *MailCoreDecodeMIMEPhrase(const char *data);
 NSString *MailCoreGetFileNameFromMIME(struct mailmime * mime);
 NSString *MailCoreGetFileNameFromMIMEFields(struct mailmime_single_fields * mime);
 NSString *MailCoreGetEMLFileNameFromMIME(struct mailmime * mime);
+NSDictionary * MailCoreDispositionsFromMIMEDipositionList(clist *params);
 
 NSDictionary * MailCoreAddressRepresentationFromMailBox(struct mailimf_mailbox *mailbox);
 NSDictionary * MailCoreAddressRepresentationFromAddress(struct mailimf_address *mailbox);
