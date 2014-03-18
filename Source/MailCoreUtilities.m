@@ -644,7 +644,7 @@ const char * getUTF7String(NSString *str, char * buffer) {
 
 NSString * MailCoreRFC822HeaderFromMailImapMsgAtt(struct mailimap_msg_att *msg_att) {
     clistiter * item_cur;
-    char * rfc822HeaderString;
+    char * rfc822HeaderString = NULL;
     
     for(item_cur = clist_begin(msg_att->att_list) ; item_cur != NULL ;
         item_cur = clist_next(item_cur)) {
