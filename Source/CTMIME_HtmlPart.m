@@ -91,7 +91,7 @@
     struct mailmime_parameter *param;
     struct mailmime_disposition *disposition;
     struct mailmime_mechanism *encoding;
-    int r;
+    __unused int r;
 
     /* text/html part */
     encoding = mailmime_mechanism_new(MAILMIME_MECHANISM_QUOTED_PRINTABLE, NULL);

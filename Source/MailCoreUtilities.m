@@ -336,7 +336,7 @@ NSString *MailCoreGetFileNameFromMIME(struct mailmime * mime) {
 
 NSString *MailCoreGetFileNameFromMIMEFields(struct mailmime_single_fields * mimeFields) {
     NSString *filename = nil;
-    if ((mimeFields->fld_disposition && mimeFields->fld_disposition->dsp_parms) || mimeFields->fld_disposition_filename) {
+    if (mimeFields->fld_disposition && mimeFields->fld_disposition->dsp_parms) {
         NSDictionary *dispositions = MailCoreDispositionsFromMIMEDipositionList(mimeFields->fld_disposition->dsp_parms);
         NSArray *filenameKeys = [[dispositions allKeys] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self beginswith[cd] 'filename'"]];
         if (filenameKeys.count > 1 || !mimeFields->fld_disposition_filename) {
@@ -349,7 +349,8 @@ NSString *MailCoreGetFileNameFromMIMEFields(struct mailmime_single_fields * mime
                 }
             }
             
-            filename = [dispositionFilename copy];
+            filename = [[dispositionFilename copy] autorelease];
+            [dispositionFilename release];
         } else if (mimeFields->fld_disposition_filename) {
             char * rawFilename = mimeFields->fld_disposition_filename;
             filename = [NSString stringWithCString:rawFilename
@@ -584,7 +585,10 @@ NSDate * MailCoreDateFromMailIMAPDateTime(struct mailimf_date_time * datetime) {
     component.day = datetime->dt_day;
     component.timeZone = MailCoreTimeZoneFromDTTimeZone(datetime->dt_zone);
     
-    return [calendar dateFromComponents:component];
+    NSDate *date = [calendar dateFromComponents:component];
+    [component release];
+    
+    return date;
 }
 
 NSTimeZone * MailCoreTimeZoneFromDTTimeZone(int timezone) {

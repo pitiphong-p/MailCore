@@ -88,7 +88,7 @@
     struct mailmime *mime_sub;
     struct mailmime_content *content;
     struct mailmime_parameter *param;
-    int r;
+    __unused int r;
 
     /* text/plain part */
     mime_fields = mailmime_fields_new_encoding(MAILMIME_MECHANISM_QUOTED_PRINTABLE);

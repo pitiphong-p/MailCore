@@ -109,7 +109,6 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
       key = [key substringFromIndex:@"IS".length];
     }
     
-    CTSearchKey searchKey = CTSearchUnknownKey;
     if ([key isEqualToString:@"NEW"] || [key isEqualToString:@"OLD"] ||
         [key isEqualToString:@"RECENT"] ||
         [key isEqualToString:@"ANSWERED"] || [key isEqualToString:@"UNANSWERED"] ||
@@ -150,10 +149,8 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
                [key rangeOfString:@"CC"].location != NSNotFound || [key rangeOfString:@"BCC"].location != NSNotFound ||
                [key rangeOfString:@"TO"].location != NSNotFound || [key rangeOfString:@"FROM"].location != NSNotFound ||
                [key isEqualToString:@"TEXT"] || [key isEqualToString:@"SUBJECT"] ||
-               [key rangeOfString:@"BODY"].location != NSNotFound || [key rangeOfString:@"CONTENT"].location != NSNotFound) {
-      searchKey = CTSearchKeyworkKey;
-      
-      struct mailimap_search_key * (* search_key_function)(char *);
+               [key rangeOfString:@"BODY"].location != NSNotFound || [key rangeOfString:@"CONTENT"].location != NSNotFound) {      
+      struct mailimap_search_key * (* search_key_function)(char *) = &mailimap_search_key_new_text;
       if ([key isEqualToString:@"KEYWORD"]) {
         search_key_function = &mailimap_search_key_new_keyword;
       } else if ([key isEqualToString:@"UNKEYWORD"]) {
@@ -189,7 +186,6 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
       }
     } else if ([key isEqualToString:@"SIZE"] || [key isEqualToString:@"SMALLER"] ||
                [key isEqualToString:@"LARGER"]) {
-      searchKey = CTSearchSizeKey;
       if (([key isEqualToString:@"SIZE"]  &&
            (comparisonPredicate.predicateOperatorType == NSGreaterThanOrEqualToPredicateOperatorType ||
             comparisonPredicate.predicateOperatorType == NSGreaterThanPredicateOperatorType)) ||
@@ -202,7 +198,6 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
         mailimap_search_key = mailimap_search_key_new_larger([value unsignedIntValue]);
       }
     } else if ([key isEqualToString:@"INTERNALDATE"]) {
-      searchKey = CTSearchInternalDateKey;
       NSDate *date = nil;
       NSCalendar *calendar = [NSCalendar currentCalendar];
       if ([value isKindOfClass:[NSDate class]]) {
@@ -220,6 +215,7 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
           NSDateComponents *carryComponents = [[NSDateComponents alloc] init];
           [carryComponents setDay:1];
           date = [calendar dateByAddingComponents:carryComponents toDate:date options:0];
+          [carryComponents release];
         }
         case NSGreaterThanOrEqualToPredicateOperatorType:
           mailimap_search_key = mailimap_search_key_new_since(mailimap_dateFromDate(date));
@@ -229,11 +225,12 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
           NSDateComponents *carryComponents = [[NSDateComponents alloc] init];
           [carryComponents setDay:-1];
           date = [calendar dateByAddingComponents:carryComponents toDate:date options:0];
+          [carryComponents release];
         }
 
         case NSLessThanOrEqualToPredicateOperatorType:
           mailimap_search_key = mailimap_search_key_new_before(mailimap_dateFromDate(date));
-          
+          break;
         case NSBetweenPredicateOperatorType: {
           NSExpression *valueExpression = comparisonPredicate.rightExpression;
 
@@ -265,8 +262,6 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
           break;
       }
     } else if ([key isEqualToString:@"DATE"] || [key isEqualToString:@"SENTDATE"]) {
-      searchKey = CTSearchDateKey;
-      
       NSDate *date = nil;
       NSCalendar *calendar = [NSCalendar currentCalendar];
       if ([value isKindOfClass:[NSDate class]]) {
@@ -284,6 +279,7 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
           NSDateComponents *carryComponents = [[NSDateComponents alloc] init];
           [carryComponents setDay:1];
           date = [calendar dateByAddingComponents:carryComponents toDate:date options:0];
+          [carryComponents release];
         }
         case NSGreaterThanOrEqualToPredicateOperatorType:
           mailimap_search_key = mailimap_search_key_new_sentsince(mailimap_dateFromDate(date));
@@ -293,11 +289,12 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
           NSDateComponents *carryComponents = [[NSDateComponents alloc] init];
           [carryComponents setDay:-1];
           date = [calendar dateByAddingComponents:carryComponents toDate:date options:0];
+          [carryComponents release];
         }
           
         case NSLessThanOrEqualToPredicateOperatorType:
           mailimap_search_key = mailimap_search_key_new_sentbefore(mailimap_dateFromDate(date));
-          
+          break;
         case NSBetweenPredicateOperatorType: {
           NSExpression *valueExpression = comparisonPredicate.rightExpression;
           
@@ -343,6 +340,7 @@ typedef NS_ENUM(NSInteger, CTSearchAttributeType){
           }
         }
       }
+      free(key_string);
     }
   } else if ([predicate isKindOfClass:[NSCompoundPredicate class]]) {
     NSCompoundPredicate *compoundPredicate = (NSCompoundPredicate *)predicate;

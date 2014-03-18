@@ -43,7 +43,7 @@
 + (BOOL)sendMessage:(CTCoreMessage *)message server:(NSString *)server username:(NSString *)username
            password:(NSString *)password port:(unsigned int)port connectionType:(CTSMTPConnectionType)connectionType
             useAuth:(BOOL)auth error:(NSError **)error {
-    BOOL success;
+    BOOL success = NO;
     mailsmtp *smtp = NULL;
     smtp = mailsmtp_new(0, NULL);
 
@@ -105,7 +105,9 @@
     [smtpObj release];
     return YES;
 error:
-    *error = smtpObj.lastError;
+	  if (error) {
+      *error = smtpObj.lastError;
+    }
     [smtpObj release];
     mailsmtp_free(smtp);
     return NO;
@@ -114,7 +116,7 @@ error:
 + (BOOL)canConnectToServer:(NSString *)server username:(NSString *)username password:(NSString *)password
                       port:(unsigned int)port connectionType:(CTSMTPConnectionType)connectionType
                    useAuth:(BOOL)auth error:(NSError **)error {
-  BOOL success;
+  BOOL success= NO;
   mailsmtp *smtp = NULL;
   smtp = mailsmtp_new(0, NULL);
     
@@ -155,7 +157,9 @@ error:
   [smtpObj release];
   return YES;
 error:
-  *error = smtpObj.lastError;
+  if (error) {
+    *error = smtpObj.lastError;
+  }
   [smtpObj release];
   mailsmtp_free(smtp);
   return NO;

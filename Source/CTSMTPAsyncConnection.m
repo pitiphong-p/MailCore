@@ -161,7 +161,7 @@ smtpProgress(size_t aCurrent, size_t aTotal) {
 
 - (void)sendMailThread {
     NSAutoreleasePool *thePool = [[NSAutoreleasePool alloc] init];
-    BOOL success;
+    BOOL success = NO;
 
     void (*progFxn)(size_t, size_t) = &smtpProgress;
     mSMTP = NULL;

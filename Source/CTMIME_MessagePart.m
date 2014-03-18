@@ -131,7 +131,8 @@
             }
         }
         
-        myRFC822Headers = [rfc822Headers ?: @{} copy];
+        myRFC822Headers = [NSDictionary dictionaryWithDictionary:rfc822Headers];
+        [rfc822Headers release];
     }
     
     return myRFC822Headers;

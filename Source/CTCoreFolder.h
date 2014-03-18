@@ -339,7 +339,7 @@ Use this method get the message uids sorted by the sort descriptors and filtered
  @return Return index set contains the copied messages' uid on success, \
  nil on error. Call method lastError to get error if one occurred
  */
-- (NSIndexSet *)copyMessageWithUIDs:(NSIndexSet *)uids toPath:(NSString *)path;
+- (NSIndexSet *)performCopyMessageWithUIDs:(NSIndexSet *)uids toPath:(NSString *)path;
 
 /**
  Moves a message to a folder

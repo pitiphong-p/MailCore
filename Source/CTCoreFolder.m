@@ -238,7 +238,7 @@ void mailimap_sort_key_free(struct mailimap_sort_key * key);
 
 - (void)cancelIdle {
     if (self.idling) {
-        int r;
+        __unused int r;
         char c;
         
         c = 0;
@@ -291,7 +291,7 @@ void mailimap_sort_key_free(struct mailimap_sort_key * key);
 
 
 - (BOOL)subscribe {
-    int err;
+    __unused int err;
     
     char path[MAX_PATH_SIZE];
     [self getUTF7String:path fromString:myPath];
@@ -778,7 +778,7 @@ void mailimap_sort_key_free(struct mailimap_sort_key * key);
     
     mailimap_sort_result_free(fetch_result);
     
-    return [messageUIDs copy];
+    return [NSArray arrayWithArray:messageUIDs];
 }
 
 - (NSArray *)messagesMatchingPredicate:(NSPredicate *)predicate sortDescriptors:(NSArray *)sortDescriptors withFetchAttributes:(CTFetchAttributes)attrs {
@@ -1093,7 +1093,7 @@ void mailimap_sort_key_free(struct mailimap_sort_key * key);
     return YES;
 }
 
-- (NSIndexSet *)copyMessageWithUIDs:(NSIndexSet *)uids toPath:(NSString *)path {
+- (NSIndexSet *)performCopyMessageWithUIDs:(NSIndexSet *)uids toPath:(NSString *)path {
     if (![uids count]) {
         return [NSIndexSet indexSet];
     }

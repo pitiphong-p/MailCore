@@ -193,7 +193,7 @@ static void download_progress_callback(size_t current, size_t maximum, void * co
     struct mailmime_fields *mime_fields;
     struct mailmime *mime_sub;
     struct mailmime_content *content;
-    int r;
+    __unused int r;
 
     if (mFilename) {
         char *charData = (char *)[mFilename cStringUsingEncoding:NSUTF8StringEncoding];

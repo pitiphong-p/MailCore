@@ -103,7 +103,7 @@
 - (NSString *)render {
     MMAPString * str = mmap_string_new("");
     int col = 0;
-    int err = 0;
+    __unused int err = 0;
     NSString *resultStr;
 
     struct mailmime *mime = [self buildMIMEStruct];
